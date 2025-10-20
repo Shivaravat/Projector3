@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मोबाइल कैमरा प्रोजेक्टर - Permission Fixed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #8e44ad;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--dark) 0%, #34495e 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success));
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .mobile-fix-section {
+            background: #fff3cd;
+            border-left: 5px solid var(--warning);
+            padding: 20px;
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .mobile-fix-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fix-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .fix-step {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .step-number {
+            background: var(--warning);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .camera-test-area {
+            background: #e8f4f8;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 10px;
+            border: 2px dashed #3498db;
+            text-align: center;
+        }
+
+        .test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: var(--primary);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-success { background: var(--success); }
+        .btn-info { background: var(--secondary); }
+        .btn-warning { background: var(--warning); }
+        .btn-danger { background: var(--danger); }
+        .btn-dark { background: var(--dark); }
+
+        .preview-area {
+            padding: 20px;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            margin: 15px;
+            border-radius: 15px;
+            border: 3px dashed #bdc3c7;
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        #videoElement, #cameraFeed {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 30px;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        .status-bar {
+            background: var(--dark);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .permission-status {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 15px;
+            border-left: 4px solid var(--danger);
+            display: none;
+        }
+
+        .permission-success {
+            background: #d1edf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 15px;
+            border-left: 4px solid var(--success);
+            display: none;
+        }
+
+        .browser-tips {
+            background: #d5edf7;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .browser-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .browser-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .loader {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .btn { padding: 10px 16px; font-size: 13px; }
+            .fix-steps { grid-template-columns: 1fr; }
+            .status-bar { flex-direction: column; gap: 8px; align-items: flex-start; }
+            .test-buttons { flex-direction: column; align-items: center; }
+            .test-buttons .btn { width: 100%; max-width: 250px; justify-content: center; }
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-mobile-alt"></i> मोबाइल कैमरा फिक्स</h1>
+            <p>Permission Denied Error का पूरा समाधान</p>
+        </div>
+
+        <div class="mobile-fix-section">
+            <h3><i class="fas fa-tools"></i> मोबाइल पर कैमरा Permission Denied ठीक करें</h3>
+            <div class="fix-steps">
+                <div class="fix-step">
+                    <div class="step-number">1</div>
+                    <div><strong>HTTPS चेक करें</strong> - केवल https:// वेबसाइट्स पर कैमरा काम करता है</div>
+                </div>
+                <div class="fix-step">
+                    <div class="step-number">2</div>
+                    <div><strong>ब्राउज़र सेटिंग</strong> - Settings → Site Settings → Camera → Allow</div>
+                </div>
+                <div class="fix-step">
+                    <div class="step-number">3</div>
+                    <div><strong>कैमरा परमिशन</strong> - पहले दिए गए permission को reset करें</div>
+                </div>
+                <div class="fix-step">
+                    <div class="step-number">4</div>
+                    <div><strong>ब्राउज़र बदलें</strong> - Chrome, Firefox, Safari में try करें</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="permission-status" id="permissionStatus">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="statusMessage">Permission Error: कैमरा एक्सेस नहीं मिल रहा</span>
+        </div>
+
+        <div class="permission-success" id="permissionSuccess">
+            <i class="fas fa-check-circle"></i>
+            <span>सफलता! कैमरा चालू हो गया</span>
+        </div>
+
+        <div class="camera-test-area">
+            <h3><i class="fas fa-camera"></i> कैमरा टेस्ट जोन</h3>
+            <p>नीचे दिए बटन्स से कैमरा टेस्ट करें (मोबाइल के लिए ऑप्टिमाइज्ड)</p>
+            
+            <div class="test-buttons">
+                <button class="btn btn-success" onclick="testMobileCamera('environment')">
+                    <i class="fas fa-camera"></i> रियर कैमरा टेस्ट
+                </button>
+                <button class="btn btn-info" onclick="testMobileCamera('user')">
+                    <i class="fas fa-mobile-alt"></i> फ्रंट कैमरा टेस्ट
+                </button>
+                <button class="btn btn-warning" onclick="testMobileCamera('any')">
+                    <i class="fas fa-random"></i> ऑटो कैमरा टेस्ट
+                </button>
+                <button class="btn btn-danger" onclick="stopCamera()">
+                    <i class="fas fa-stop"></i> कैमरा बंद करें
+                </button>
+            </div>
+
+            <div class="loader" id="loader"></div>
+        </div>
+
+        <div class="preview-area" id="previewArea">
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-camera-slash"></i>
+                <h3>कैमरा प्रीव्यू</h3>
+                <p>ऊपर बटन दबाकर कैमरा टेस्ट करें</p>
+            </div>
+            
+            <video id="cameraFeed" autoplay playsinline muted></video>
+            <img id="preview" alt="Image Preview">
+            <video id="videoElement" controls></video>
+        </div>
+
+        <div class="browser-tips">
+            <h4><i class="fas fa-mobile"></i> मोबाइल ब्राउज़र सेटिंग्स</h4>
+            <div class="browser-list">
+                <div class="browser-item">Chrome: ⋮ → Settings → Site Settings → Camera</div>
+                <div class="browser-item">Firefox: ⋮ → Settings → Permissions → Camera</div>
+                <div class="browser-item">Safari: Settings → Safari → Camera & Microphone</div>
+            </div>
+        </div>
+
+        <button class="btn btn-dark" onclick="toggleDebugInfo()" style="margin: 0 15px 15px;">
+            <i class="fas fa-bug"></i> डीबग इन्फो दिखाएं
+        </button>
+
+        <div class="debug-info" id="debugInfo">
+            <div><strong>डिवाइस इन्फो:</strong> <span id="debugDevice"></span></div>
+            <div><strong>ब्राउज़र:</strong> <span id="debugBrowser"></span></div>
+            <div><strong>HTTPS:</strong> <span id="debugHttps"></span></div>
+            <div><strong>कैमरा उपलब्ध:</strong> <span id="debugCamera"></span></div>
+            <div><strong>परमिशन स्टेटस:</strong> <span id="debugPermission"></span></div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <i class="fas fa-mobile-alt"></i>
+                <span id="deviceInfo">डिवाइस: डिटेक्ट हो रहा...</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-camera"></i>
+                <span id="cameraStatus">कैमरा: चेक हो रहा...</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-shield-alt"></i>
+                <span id="httpsStatus">HTTPS: चेक हो रहा...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const cameraFeed = document.getElementById('cameraFeed');
+        const preview = document.getElementById('preview');
+        const videoElement = document.getElementById('videoElement');
+        const emptyState = document.getElementById('emptyState');
+        const loader = document.getElementById('loader');
+        const deviceInfo = document.getElementById('deviceInfo');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const httpsStatus = document.getElementById('httpsStatus');
+        const permissionStatus = document.getElementById('permissionStatus');
+        const permissionSuccess = document.getElementById('permissionSuccess');
+        const statusMessage = document.getElementById('statusMessage');
+        const debugInfo = document.getElementById('debugInfo');
+        const debugDevice = document.getElementById('debugDevice');
+        const debugBrowser = document.getElementById('debugBrowser');
+        const debugHttps = document.getElementById('debugHttps');
+        const debugCamera = document.getElementById('debugCamera');
+        const debugPermission = document.getElementById('debugPermission');
+
+        let stream = null;
+
+        // Detect device and environment
+        function detectEnvironment() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isHTTPS = window.location.protocol === 'https:';
+            const browser = detectBrowser();
+            
+            deviceInfo.textContent = `डिवाइस: ${isMobile ? 'मोबाइल' : 'डेस्कटॉप'}`;
+            httpsStatus.textContent = `HTTPS: ${isHTTPS ? 'हाँ' : 'नहीं'}`;
+            httpsStatus.style.color = isHTTPS ? '#2ecc71' : '#e74c3c';
+            
+            // Debug info
+            debugDevice.textContent = isMobile ? 'मोबाइल' : 'डेस्कटॉप';
+            debugBrowser.textContent = browser;
+            debugHttps.textContent = isHTTPS ? 'हाँ' : 'नहीं (कैमरा काम नहीं करेगा)';
+            debugHttps.style.color = isHTTPS ? 'green' : 'red';
+            
+            return { isMobile, isHTTPS, browser };
+        }
+
+        // Detect browser
+        function detectBrowser() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.includes('Chrome')) return 'Chrome';
+            if (userAgent.includes('Firefox')) return 'Firefox';
+            if (userAgent.includes('Safari')) return 'Safari';
+            if (userAgent.includes('Edge')) return 'Edge';
+            return 'अन्य ब्राउज़र';
+        }
+
+        // Check camera availability
+        async function checkCameraAvailability() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                if (videoDevices.length === 0) {
+                    cameraStatus.textContent = 'कैमरा: उपलब्ध नहीं';
+                    cameraStatus.style.color = '#e74c3c';
+                    debugCamera.textContent = 'कोई कैमरा नहीं मिला';
+                    debugCamera.style.color = 'red';
+                } else {
+                    cameraStatus.textContent = `कैमरा: ${videoDevices.length} उपलब्ध`;
+                    cameraStatus.style.color = '#2ecc71';
+                    debugCamera.textContent = `${videoDevices.length} कैमरा उपलब्ध`;
+                    debugCamera.style.color = 'green';
+                }
+            } catch (error) {
+                cameraStatus.textContent = 'कैमरा: जांच नहीं हो सका';
+                cameraStatus.style.color = '#e74c3c';
+                debugCamera.textContent = 'जांच नहीं हो सका';
+                debugCamera.style.color = 'red';
+            }
+        }
+
+        // Test mobile camera with different methods
+        async function testMobileCamera(mode) {
+            const { isHTTPS } = detectEnvironment();
+            
+            if (!isHTTPS) {
+                showPermissionError('ERROR: कैमरा केवल HTTPS वेबसाइट्स पर काम करता है। कृपया HTTPS यूज़ करें।');
+                return;
+            }
+
+            showLoader();
+            hideMessages();
+            stopCamera();
+
+            try {
+                let constraints;
+                
+                if (mode === 'environment') {
+                    constraints = { 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    };
+                } else if (mode === 'user') {
+                    constraints = { 
+                        video: { 
+                            facingMode: 'user',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    };
+                } else {
+                    constraints = { 
+                        video: {
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    };
+                }
+
+                // Try to get camera with timeout
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Camera timeout - परमिशन का इंतज़ार')), 10000)
+                );
+
+                const cameraPromise = navigator.mediaDevices.getUserMedia(constraints);
+                
+                stream = await Promise.race([cameraPromise, timeoutPromise]);
+                
+                // Success
+                cameraFeed.srcObject = stream;
+                cameraFeed.style.display = 'block';
+                emptyState.style.display = 'none';
+                preview.style.display = 'none';
+                videoElement.style.display = 'none';
+                
+                showPermissionSuccess();
+                debugPermission.textContent = 'परमिशन मिल गई';
+                debugPermission.style.color = 'green';
+                
+            } catch (error) {
+                let errorMsg = '';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = 'परमिशन denied - ब्राउज़र सेटिंग चेक करें';
+                } else if (error.name === 'NotFoundError') {
+                    errorMsg = 'कोई कैमरा नहीं मिला';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMsg = 'ब्राउज़र कैमरा सपोर्ट नहीं करता';
+                } else if (error.message.includes('timeout')) {
+                    errorMsg = 'कैमरा timeout - परमिशन का इंतज़ार कर रहे';
+                } else {
+                    errorMsg = `Error: ${error.message}`;
+                }
+                
+                showPermissionError(errorMsg);
+                debugPermission.textContent = errorMsg;
+                debugPermission.style.color = 'red';
+            }
+            
+            hideLoader();
+        }
+
+        // Stop camera
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                cameraFeed.style.display = 'none';
+                stream = null;
+                emptyState.style.display = 'block';
+                hideMessages();
+            }
+        }
+
+        // Show permission error
+        function showPermissionError(message) {
+            statusMessage.textContent = message;
+            permissionStatus.style.display = 'block';
+            permissionSuccess.style.display = 'none';
+        }
+
+        // Show permission success
+        function showPermissionSuccess() {
+            permissionStatus.style.display = 'none';
+            permissionSuccess.style.display = 'block';
+        }
+
+        // Hide all messages
+        function hideMessages() {
+            permissionStatus.style.display = 'none';
+            permissionSuccess.style.display = 'none';
+        }
+
+        // Loader functions
+        function showLoader() {
+            loader.style.display = 'block';
+        }
+
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+
+        // Toggle debug info
+        function toggleDebugInfo() {
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Initialize
+        detectEnvironment();
+        checkCameraAvailability();
+        
+        // Auto-detect and show debug info on mobile
+        setTimeout(() => {
+            const { isMobile } = detectEnvironment();
+            if (isMobile) {
+                debugInfo.style.display = 'block';
+            }
+        }, 1000);
+
+        console.log('मोबाइल कैमरा फिक्स एप्लिकेशन लोड हो गया!');
+    </script>
+</body>
+</html>
